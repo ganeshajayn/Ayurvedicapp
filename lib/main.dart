@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:noviindus_ayurvedic/provider/auth_provider.dart';
+import 'package:noviindus_ayurvedic/provider/branch_treatprovider.dart';
 import 'package:noviindus_ayurvedic/provider/patient_provider.dart';
 import 'package:noviindus_ayurvedic/screens/splashscreen/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => PatientProvider()),
+        ChangeNotifierProvider(create: (_) => Brachtreatmentprovider()),
       ],
       child: const MyApp(),
     ),

@@ -58,6 +58,7 @@ class Branch {
   final String phone;
   final String mail;
   final String address;
+  final bool isActive;
 
   Branch({
     required this.id,
@@ -66,6 +67,7 @@ class Branch {
     required this.phone,
     required this.mail,
     required this.address,
+    required this.isActive,
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {
@@ -76,6 +78,7 @@ class Branch {
       phone: json['phone'] ?? "",
       mail: json['mail'] ?? "",
       address: json['address'] ?? "",
+      isActive: json['is_active'] ?? false,
     );
   }
 }

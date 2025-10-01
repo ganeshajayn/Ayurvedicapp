@@ -80,7 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => RegisterScreen()),
+                MaterialPageRoute(
+                  builder: (context) => RegisterScreen(token: widget.token),
+                ),
               );
             },
             style: ElevatedButton.styleFrom(
