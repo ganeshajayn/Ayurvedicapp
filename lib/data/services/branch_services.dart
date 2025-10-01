@@ -30,4 +30,29 @@ class BranchServices {
       throw Exception("Failed to fetch branches: $e");
     }
   }
+
+  Future<List<Treatment>> gettreatment(String token) async {
+    try {
+      final url = Uri.parse("${baseurl}TreatmentList");
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data["status"] == true) {
+          return (data["treatments"] as List)
+              .map((json) => Treatment.fromJson(json))
+              .toList();
+        } else {
+          throw Exception(data["message"]);
+        }
+      } else {
+        throw Exception("Failed to load treatments: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("error in treatment: $e");
+      throw Exception("Failed to fetch treatments: $e");
+    }
+  }
 }

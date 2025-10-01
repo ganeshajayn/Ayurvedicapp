@@ -3,6 +3,15 @@ import 'package:noviindus_ayurvedic/provider/branch_treatprovider.dart';
 import 'package:noviindus_ayurvedic/widgets/textfield_widgets.dart';
 import 'package:provider/provider.dart';
 
+// Treatment model class
+class Treatment {
+  final String name;
+  final int price;
+  final String duration;
+
+  Treatment({required this.name, required this.price, required this.duration});
+}
+
 class RegisterScreen extends StatefulWidget {
   final String token;
 
@@ -32,11 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final List<String> locations = ["Kochi", "Calicut", "Trivandrum"];
   final List<String> branches = ["Kumarakom", "Kottayam", "Ernakulam"];
-  final List<String> treatments = [
-    "Couple Combo Package",
-    "Panchakarma",
-    "Rejuvenation",
-  ];
+  // Remove hardcoded treatments list - will use provider data instead
 
   // Treatment list with male/female counts
   List<Map<String, dynamic>> selectedTreatments = [];
@@ -64,13 +69,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch branch list when screen opens
+    // Fetch branch list and treatments when screen opens
     Future.microtask(() {
       final provider = Provider.of<Brachtreatmentprovider>(
         context,
         listen: false,
       );
       provider.fetchbranches(widget.token);
+      provider.fetchtreatment(widget.token);
     });
   }
 
@@ -145,15 +151,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   "Treatments",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add_circle, color: Colors.teal),
-                  onPressed: () {
-                    // For now just pick the first treatment
-                    _addTreatment(treatments[0]);
+                Consumer<Brachtreatmentprovider>(
+                  builder: (context, provider, child) {
+                    return IconButton(
+                      icon: const Icon(Icons.add_circle, color: Colors.teal),
+                      onPressed: () async {
+                        if (provider.treatments.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("No treatments available"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // Open a dialog to select treatment
+                        final selected = await showDialog<Map<String, dynamic>>(
+                          context: context,
+                          builder: (ctx) {
+                            return AlertDialog(
+                              title: const Text("Select Treatment"),
+                              content: SizedBox(
+                                width: double.maxFinite,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: provider.treatments.length,
+                                  itemBuilder: (context, index) {
+                                    final treatment =
+                                        provider.treatments[index];
+                                    return ListTile(
+                                      title: Text(treatment.name),
+                                      subtitle: Text(
+                                        "₹${treatment.price} • ${treatment.duration}",
+                                      ),
+                                      onTap: () {
+                                        Navigator.pop(ctx, {
+                                          "treatment": treatment.name,
+                                          "male": 0,
+                                          "female": 0,
+                                        });
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        );
+
+                        if (selected != null) {
+                          setState(() {
+                            selectedTreatments.add(selected);
+                          });
+                        }
+                      },
+                    );
                   },
                 ),
               ],
             ),
+
+            /// Selected Treatments List
             Column(
               children: selectedTreatments.map((t) {
                 return Card(
@@ -174,11 +232,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             IconButton(
                               icon: const Icon(Icons.remove),
                               onPressed: () {
-                                setState(
-                                  () => t["male"] = (t["male"] > 0)
+                                setState(() {
+                                  t["male"] = (t["male"] > 0)
                                       ? t["male"] - 1
-                                      : 0,
-                                );
+                                      : 0;
+                                });
                               },
                             ),
                             Text("${t["male"]}"),
@@ -196,11 +254,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             IconButton(
                               icon: const Icon(Icons.remove),
                               onPressed: () {
-                                setState(
-                                  () => t["female"] = (t["female"] > 0)
+                                setState(() {
+                                  t["female"] = (t["female"] > 0)
                                       ? t["female"] - 1
-                                      : 0,
-                                );
+                                      : 0;
+                                });
                               },
                             ),
                             Text("${t["female"]}"),

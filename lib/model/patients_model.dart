@@ -34,20 +34,29 @@ class Patient {
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",
       payment: json['payment'] ?? "",
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
-      discountAmount: (json['discount_amount'] ?? 0).toDouble(),
-      advanceAmount: (json['advance_amount'] ?? 0).toDouble(),
-      balanceAmount: (json['balance_amount'] ?? 0).toDouble(),
-      dateTime:
-          json['date_nd_time'] != null &&
-              json['date_nd_time'].toString().isNotEmpty
-          ? DateTime.tryParse(json['date_nd_time'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+      totalAmount: _toDouble(json['total_amount']),
+      discountAmount: _toDouble(json['discount_amount']),
+      advanceAmount: _toDouble(json['advance_amount']),
+      balanceAmount: _toDouble(json['balance_amount']),
+      dateTime: _parseDate(json['date_nd_time']),
       branch: Branch.fromJson(json['branch'] ?? {}),
       treatmentDetails: (json['patientdetails_set'] as List? ?? [])
           .map((e) => TreatmentDetail.fromJson(e))
           .toList(),
     );
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  static DateTime _parseDate(dynamic value) {
+    if (value == null || value.toString().isEmpty) return DateTime.now();
+    return DateTime.tryParse(value.toString()) ?? DateTime.now();
   }
 }
 
@@ -83,10 +92,42 @@ class Branch {
   }
 }
 
+class Treatment {
+  final int id;
+  final String name;
+  final String duration;
+  final String price;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  Treatment({
+    required this.id,
+    required this.name,
+    required this.duration,
+    required this.price,
+    required this.isActive,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Treatment.fromJson(Map<String, dynamic> json) {
+    return Treatment(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? "",
+      duration: json['duration'] ?? "",
+      price: json['price'] ?? "0",
+      isActive: json['is_active'] ?? false,
+      createdAt: DateTime.tryParse(json['created_at'] ?? "") ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] ?? "") ?? DateTime.now(),
+    );
+  }
+}
+
 class TreatmentDetail {
   final int id;
-  final String male;
-  final String female;
+  final int male;
+  final int female;
   final int treatmentId;
   final String treatmentName;
 
@@ -101,8 +142,8 @@ class TreatmentDetail {
   factory TreatmentDetail.fromJson(Map<String, dynamic> json) {
     return TreatmentDetail(
       id: json['id'] ?? 0,
-      male: json['male']?.toString() ?? "0",
-      female: json['female']?.toString() ?? "0",
+      male: int.tryParse(json['male']?.toString() ?? "0") ?? 0,
+      female: int.tryParse(json['female']?.toString() ?? "0") ?? 0,
       treatmentId: json['treatment'] ?? 0,
       treatmentName: json['treatment_name'] ?? "",
     );
