@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:noviindus_ayurvedic/provider/auth_provider.dart';
+import 'package:noviindus_ayurvedic/provider/patient_provider.dart';
 import 'package:noviindus_ayurvedic/screens/splashscreen/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -8,7 +9,10 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => PatientProvider()),
+      ],
       child: const MyApp(),
     ),
   );

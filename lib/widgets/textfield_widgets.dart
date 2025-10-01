@@ -61,7 +61,7 @@ class CustomTextField extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
       ],
     );
   }
