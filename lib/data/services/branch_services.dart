@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:noviindus_ayurvedic/model/patients_model.dart';
+import 'package:noviindus_ayurvedic/model/patientmodel/patients_model.dart';
 
 class BranchServices {
   static const String baseurl = "https://flutter-amr.noviindus.in/api/";

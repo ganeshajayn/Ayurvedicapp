@@ -7,7 +7,6 @@ class PdfInvoiceService {
   Future<pw.Document> createInvoice(Map<String, dynamic> data) async {
     final pdf = pw.Document();
 
-    // ✅ Load logo from assets
     final Uint8List logoBytes = await rootBundle
         .load('assets/images/Logo.png')
         .then((value) => value.buffer.asUint8List());
@@ -16,7 +15,6 @@ class PdfInvoiceService {
     pdf.addPage(
       pw.MultiPage(
         build: (context) => [
-          // ✅ Logo & Header
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
@@ -46,7 +44,6 @@ class PdfInvoiceService {
           pw.SizedBox(height: 10),
           pw.Divider(),
 
-          // ✅ Patient Details
           pw.Text(
             "Patient Details",
             style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
@@ -72,7 +69,6 @@ class PdfInvoiceService {
 
           pw.SizedBox(height: 20),
 
-          // ✅ Treatment Table
           pw.Table.fromTextArray(
             headers: ["Treatment", "Price", "Male", "Female", "Total"],
             headerStyle: pw.TextStyle(
@@ -119,7 +115,6 @@ class PdfInvoiceService {
 
           pw.SizedBox(height: 30),
 
-          // ✅ Footer
           pw.Center(
             child: pw.Text(
               "Thank you for choosing us",

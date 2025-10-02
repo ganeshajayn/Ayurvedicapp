@@ -1,5 +1,5 @@
 class Patient {
-  final String id; // API expects "" for new patients, so keep it String
+  final String id;
   final String name;
   final String phone;
   final String address;
@@ -29,7 +29,7 @@ class Patient {
 
   factory Patient.fromJson(Map<String, dynamic> json) {
     return Patient(
-      id: json['id']?.toString() ?? "", // String safe
+      id: json['id']?.toString() ?? "",
       name: json['name'] ?? "",
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:noviindus_ayurvedic/model/patients_model.dart';
+import 'package:noviindus_ayurvedic/model/patientmodel/patients_model.dart';
 import 'package:http/http.dart' as http;
 
 class PatienceApiservices {

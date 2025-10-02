@@ -2,7 +2,7 @@ import 'dart:ffi';
 
 import 'package:flutter/widgets.dart';
 import 'package:noviindus_ayurvedic/data/services/auth_services.dart';
-import 'package:noviindus_ayurvedic/model/user_models.dart';
+import 'package:noviindus_ayurvedic/model/usermodel/user_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {

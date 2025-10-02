@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noviindus_ayurvedic/data/services/patience_services.dart';
-import 'package:noviindus_ayurvedic/model/patients_model.dart';
+import 'package:noviindus_ayurvedic/model/patientmodel/patients_model.dart';
 
 class PatientProvider with ChangeNotifier {
   final PatienceApiservices _patienceApiservices = PatienceApiservices();

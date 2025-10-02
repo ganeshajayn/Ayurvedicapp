@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noviindus_ayurvedic/data/services/branch_services.dart';
-import 'package:noviindus_ayurvedic/model/patients_model.dart';
+import 'package:noviindus_ayurvedic/model/patientmodel/patients_model.dart';
 
 class Brachtreatmentprovider with ChangeNotifier {
   final BranchServices _branchServices = BranchServices();

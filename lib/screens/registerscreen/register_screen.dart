@@ -229,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return;
                         }
 
-                        // Open a dialog to select treatment
+                        // Open a dialog
                         final selected = await showDialog<Map<String, dynamic>>(
                           context: context,
                           builder: (ctx) {
@@ -561,7 +561,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     onPressed: () async {
-                      // Validate form data
                       if (nameController.text.trim().isEmpty ||
                           executiveController.text.trim().isEmpty ||
                           phoneController.text.trim().isEmpty ||
@@ -579,7 +578,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         return;
                       }
 
-                      // Validate that at least one treatment has a count > 0
                       bool hasValidTreatments = selectedTreatments.any(
                         (treatment) =>
                             treatment["male"] > 0 || treatment["female"] > 0,
@@ -598,7 +596,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
 
                       try {
-                        // Collect treatment IDs based on male/female counts
                         List<int> maleTreatmentIds = [];
                         List<int> femaleTreatmentIds = [];
 
@@ -609,7 +606,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             );
 
                         for (var selectedTreatment in selectedTreatments) {
-                          // Find treatment ID by name
                           final treatment = treatmentProvider.treatments
                               .firstWhere(
                                 (t) => t.name == selectedTreatment["treatment"],
