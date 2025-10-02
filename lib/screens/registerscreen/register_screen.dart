@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:noviindus_ayurvedic/provider/branch_treatprovider.dart';
 import 'package:noviindus_ayurvedic/provider/patient_provider.dart';
 import 'package:noviindus_ayurvedic/widgets/textfield_widgets.dart';
+import 'package:noviindus_ayurvedic/services/pdf_invoice.dart';
 import 'package:provider/provider.dart';
+import 'package:printing/printing.dart';
 
 // Treatment model class
 class Treatment {
@@ -32,19 +34,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController advanceController = TextEditingController();
   final TextEditingController balanceController = TextEditingController();
 
-  // Payment choice
   String selectedPayment = "Cash";
 
-  // Dropdown values
   String? selectedLocation;
   String? selectedBranch;
   DateTime? selectedDate;
 
   final List<String> locations = ["Kochi", "Calicut", "Trivandrum"];
-  final List<String> branches = ["Kumarakom", "Kottayam", "Ernakulam"];
-  // Remove hardcoded treatments list - will use provider data instead
+  // final List<String> branches = ["Kumarakom", "Kottayam", "Ernakulam"];
 
-  // Treatment list with male/female counts
   List<Map<String, dynamic>> selectedTreatments = [];
 
   void _addTreatment(String treatment) {
@@ -67,10 +65,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _generateAndPrintPDF() async {
+    try {
+      final treatmentProvider = Provider.of<Brachtreatmentprovider>(
+        context,
+        listen: false,
+      );
+
+      List<Map<String, dynamic>> treatmentData = [];
+      double totalCalculated = 0;
+
+      for (var selectedTreatment in selectedTreatments) {
+        final treatment = treatmentProvider.treatments.firstWhere(
+          (t) => t.name == selectedTreatment["treatment"],
+        );
+
+        int maleCount = selectedTreatment["male"] ?? 0;
+        int femaleCount = selectedTreatment["female"] ?? 0;
+        int totalCount = maleCount + femaleCount;
+        double treatmentPrice = double.tryParse(treatment.price) ?? 0.0;
+        double treatmentTotal = treatmentPrice * totalCount;
+        totalCalculated += treatmentTotal;
+
+        treatmentData.add({
+          'treatment': treatment.name,
+          'price': treatmentPrice,
+          'male': maleCount,
+          'female': femaleCount,
+          'total': treatmentTotal,
+        });
+      }
+
+      // Prepare PDF data
+      Map<String, dynamic> pdfData = {
+        'name': nameController.text.trim(),
+        'address': addressController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'treatments': treatmentData,
+        'total': double.tryParse(totalAmountController.text) ?? totalCalculated,
+        'discount': double.tryParse(discountController.text) ?? 0.0,
+        'advance': double.tryParse(advanceController.text) ?? 0.0,
+        'balance': double.tryParse(balanceController.text) ?? 0.0,
+      };
+
+      // Generate PDF
+      final pdfService = PdfInvoiceService();
+      final pdf = await pdfService.createInvoice(pdfData);
+
+      await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    } catch (e) {
+      print("Error generating PDF: \$e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to generate PDF: \$e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    // Fetch branch list and treatments when screen opens
+
     Future.microtask(() {
       final provider = Provider.of<Brachtreatmentprovider>(
         context,
@@ -83,7 +140,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register Patient')),
+      appBar: AppBar(
+        title: const Text(
+          'Register Patient',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        foregroundColor: const Color.fromARGB(255, 1, 119, 5),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -212,7 +275,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ],
             ),
 
-            /// Selected Treatments List
             Column(
               children: selectedTreatments.map((t) {
                 return Card(
@@ -222,7 +284,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Treatment name row with delete button
                         Row(
                           children: [
                             Expanded(
@@ -235,7 +296,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.red),
+                              icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
                                 setState(() {
                                   selectedTreatments.remove(t);
@@ -245,10 +306,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        // Count controls in a more organized layout
+
                         Row(
                           children: [
-                            // Male count section
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -472,6 +532,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               spacing: 10,
               children: ["Cash", "Card", "UPI"].map((method) {
                 return ChoiceChip(
+                  selectedColor: const Color.fromARGB(255, 3, 142, 7),
+                  backgroundColor: Colors.white,
+
                   label: Text(method),
                   selected: selectedPayment == method,
                   onSelected: (selected) {
@@ -490,6 +553,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 2, 127, 7),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -552,12 +617,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     throw Exception("Treatment not found"),
                               );
 
-                          // Add treatment ID based on male count
                           for (int i = 0; i < selectedTreatment["male"]; i++) {
                             maleTreatmentIds.add(treatment.id);
                           }
 
-                          // Add treatment ID based on female count
                           for (
                             int i = 0;
                             i < selectedTreatment["female"];
@@ -567,7 +630,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           }
                         }
 
-                        // Format date for API (01/02/2024-10:24 AM) - as confirmed by Postman
                         final now = DateTime.now();
                         String hour12 = now.hour == 0
                             ? "12"
@@ -578,22 +640,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         final formattedDate =
                             "${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}-${hour12.padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} $amPm";
 
-                        // Call the API
                         final patientProvider = Provider.of<PatientProvider>(
                           context,
                           listen: false,
                         );
 
-                        print("=== CLIENT DEBUG ===");
-                        print("Token: ${widget.token.substring(0, 20)}...");
-                        print("Formatted Date: $formattedDate");
-                        print("Branch ID: $selectedBranch");
-                        print("Male Treatment IDs: $maleTreatmentIds");
-                        print("Female Treatment IDs: $femaleTreatmentIds");
-                        print(
-                          "Total Amount: ${double.tryParse(totalAmountController.text) ?? 0.0}",
-                        );
-                        print("====================");
+                        // print("Token: ${widget.token.substring(0, 20)}...");
+                        // print("Formatted Date: $formattedDate");
+                        // print("Branch ID: $selectedBranch");
+                        // print("Male Treatment IDs: $maleTreatmentIds");
+                        // print("Female Treatment IDs: $femaleTreatmentIds");
+                        // print(
+                        //   "Total Amount: ${double.tryParse(totalAmountController.text) ?? 0.0}",
+                        // );
+                        // print("====================");
 
                         final success = await patientProvider.addPatient(
                           token: widget.token,
@@ -624,6 +684,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               backgroundColor: Colors.green,
                             ),
                           );
+
+                          // Generate PDF
+                          await _generateAndPrintPDF();
+
                           // Clear form
                           nameController.clear();
                           executiveController.clear();

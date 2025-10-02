@@ -118,7 +118,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                       if (authprovider.isAuthenticated) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Login Success")),
+                          const SnackBar(
+                            backgroundColor: Colors.lightGreen,
+                            content: Text("Successfully Logged In"),
+                          ),
                         );
                         Navigator.push(
                           context,
@@ -131,7 +134,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     } catch (e) {
                       print("error :$e");
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Login failed: $e")),
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text("Login failed: $e"),
+                        ),
                       );
                     }
                   }

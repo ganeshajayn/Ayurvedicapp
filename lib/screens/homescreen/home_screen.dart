@@ -30,7 +30,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final height = MediaQuery.sizeOf(context).height;
     final width = MediaQuery.sizeOf(context).width;
     return Scaffold(
-      appBar: AppBar(title: const Text("Patients")),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Icon(Icons.home, color: Color.fromARGB(255, 3, 136, 7), size: 25),
+            SizedBox(width: 3),
+            const Text(
+              "Home",
+              style: TextStyle(
+                color: Color.fromARGB(255, 3, 136, 7),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        automaticallyImplyLeading: false,
+      ),
       body: Consumer<PatientProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
