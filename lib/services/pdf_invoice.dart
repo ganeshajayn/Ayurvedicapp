@@ -57,13 +57,13 @@ class PdfInvoiceService {
                 children: [
                   pw.Text("Name: ${data['name']}"),
                   pw.Text("Address: ${data['address']}"),
-                  pw.Text("Whatsapp: ${data['phone']}"),
+                  pw.Text("Phone: ${data['phone']}"),
                 ],
               ),
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [pw.Text("Booked On: ${data['date_nd_time']}")],
-              ),
+              // pw.Column(
+              //   crossAxisAlignment: pw.CrossAxisAlignment.start,
+              //   children: [pw.Text("Booked On: ${data['date_nd_time']}")],
+              // ),
             ],
           ),
 
@@ -102,7 +102,7 @@ class PdfInvoiceService {
                   pw.Text("Discount: ${data['discount']}"),
                   pw.Text("Advance: ${data['advance']}"),
                   pw.Text(
-                    "Balance: ₹${data['balance']}",
+                    "Balance: ${data['balance']}",
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.black,

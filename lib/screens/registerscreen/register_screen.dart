@@ -45,6 +45,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   List<Map<String, dynamic>> selectedTreatments = [];
 
+  // Method to calculate total amount automatically
+  void _calculateTotalAmount() {
+    final treatmentProvider = Provider.of<Brachtreatmentprovider>(
+      context,
+      listen: false,
+    );
+
+    double totalCalculated = 0.0;
+
+    for (var selectedTreatment in selectedTreatments) {
+      try {
+        // Find the treatment details from provider
+        final treatment = treatmentProvider.treatments.firstWhere(
+          (t) => t.name == selectedTreatment["treatment"],
+        );
+
+        int maleCount = selectedTreatment["male"] ?? 0;
+        int femaleCount = selectedTreatment["female"] ?? 0;
+        int totalCount = maleCount + femaleCount;
+
+        // Convert price to double
+        double treatmentPrice = double.tryParse(treatment.price) ?? 0.0;
+        double treatmentTotal = treatmentPrice * totalCount;
+        totalCalculated += treatmentTotal;
+      } catch (e) {
+        // If treatment not found, skip
+        print("Treatment not found: ${selectedTreatment["treatment"]}");
+      }
+    }
+
+    // Update the total amount controller
+    setState(() {
+      totalAmountController.text = totalCalculated.toStringAsFixed(0);
+    });
+  }
+
   void _addTreatment(String treatment) {
     setState(() {
       selectedTreatments.add({"treatment": treatment, "male": 0, "female": 0});
@@ -267,6 +303,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           setState(() {
                             selectedTreatments.add(selected);
                           });
+                          // Calculate total amount after adding treatment
+                          _calculateTotalAmount();
                         }
                       },
                     );
@@ -301,9 +339,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 setState(() {
                                   selectedTreatments.remove(t);
                                 });
+                                _calculateTotalAmount();
                               },
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Show treatment total
+                        Consumer<Brachtreatmentprovider>(
+                          builder: (context, provider, child) {
+                            try {
+                              final treatment = provider.treatments.firstWhere(
+                                (tr) => tr.name == t["treatment"],
+                              );
+                              int maleCount = t["male"] ?? 0;
+                              int femaleCount = t["female"] ?? 0;
+                              int totalCount = maleCount + femaleCount;
+                              double treatmentPrice = double.tryParse(treatment.price) ?? 0.0;
+                              double treatmentTotal = treatmentPrice * totalCount;
+                              
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: Colors.green.shade200),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Rate: ₹${treatment.price} × $totalCount",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Total: ₹${treatmentTotal.toStringAsFixed(0)}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } catch (e) {
+                              return const SizedBox.shrink();
+                            }
+                          },
                         ),
                         const SizedBox(height: 8),
 
@@ -348,6 +434,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                     ? t["male"] - 1
                                                     : 0;
                                               });
+                                              _calculateTotalAmount();
                                             },
                                           ),
                                         ),
@@ -384,6 +471,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             ),
                                             onPressed: () {
                                               setState(() => t["male"]++);
+                                              _calculateTotalAmount();
                                             },
                                           ),
                                         ),
@@ -434,6 +522,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                     ? t["female"] - 1
                                                     : 0;
                                               });
+                                              _calculateTotalAmount();
                                             },
                                           ),
                                         ),
@@ -470,6 +559,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             ),
                                             onPressed: () {
                                               setState(() => t["female"]++);
+                                              _calculateTotalAmount();
                                             },
                                           ),
                                         ),
