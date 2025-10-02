@@ -1,5 +1,5 @@
 class Patient {
-  final int id;
+  final String id; // API expects "" for new patients, so keep it String
   final String name;
   final String phone;
   final String address;
@@ -29,7 +29,7 @@ class Patient {
 
   factory Patient.fromJson(Map<String, dynamic> json) {
     return Patient(
-      id: json['id'] ?? 0,
+      id: json['id']?.toString() ?? "", // String safe
       name: json['name'] ?? "",
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",
@@ -125,9 +125,9 @@ class Treatment {
 }
 
 class TreatmentDetail {
-  final int id;
-  final int male;
-  final int female;
+  final String id;
+  final List<int> male;
+  final List<int> female;
   final int treatmentId;
   final String treatmentName;
 
@@ -141,11 +141,21 @@ class TreatmentDetail {
 
   factory TreatmentDetail.fromJson(Map<String, dynamic> json) {
     return TreatmentDetail(
-      id: json['id'] ?? 0,
-      male: int.tryParse(json['male']?.toString() ?? "0") ?? 0,
-      female: int.tryParse(json['female']?.toString() ?? "0") ?? 0,
+      id: json['id']?.toString() ?? "",
+      male: _parseIds(json['male']),
+      female: _parseIds(json['female']),
       treatmentId: json['treatment'] ?? 0,
       treatmentName: json['treatment_name'] ?? "",
     );
+  }
+
+  static List<int> _parseIds(dynamic value) {
+    if (value == null || value.toString().isEmpty) return [];
+    return value
+        .toString()
+        .split(",")
+        .map((e) => int.tryParse(e.trim()) ?? 0)
+        .where((id) => id != 0)
+        .toList();
   }
 }

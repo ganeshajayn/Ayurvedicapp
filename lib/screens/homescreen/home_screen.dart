@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Provider.of<PatientProvider>(
         context,
         listen: false,
-      ).Fetchpatients(widget.token);
+      ).fetchPatients(widget.token);
     });
   }
 
@@ -33,18 +33,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(title: const Text("Patients")),
       body: Consumer<PatientProvider>(
         builder: (context, provider, child) {
-          if (provider.isloading) {
+          if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (provider.errormessagel != null) {
-            return Center(child: Text(provider.errormessagel!));
+          if (provider.errorMessage != null) {
+            return Center(child: Text(provider.errorMessage!));
           }
           if (provider.patients.isEmpty) {
             return const Center(child: Text("No patients found"));
           }
 
           return RefreshIndicator(
-            onRefresh: () => provider.Fetchpatients(widget.token),
+            onRefresh: () => provider.fetchPatients(widget.token),
             child: ListView.builder(
               itemCount: provider.patients.length,
               itemBuilder: (context, index) {
